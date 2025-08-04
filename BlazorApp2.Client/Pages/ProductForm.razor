@@ -1,0 +1,95 @@
+﻿@page "/product-form"
+@rendermode InteractiveWebAssembly
+@using System.ComponentModel.DataAnnotations
+
+<h3>Product Form</h3>
+
+<EditForm Model="product" OnValidSubmit="SaveProduct" FormName="ProductForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Name:</label>
+        <InputText @bind-Value="product.Name" />
+        <ValidationMessage For="@(() => product.Name)" />
+    </div>
+
+    <div>
+        <label>Price (kr):</label>
+        <InputNumber @bind-Value="product.Price" />
+        <ValidationMessage For="@(() => product.Price)" />
+    </div>
+
+    <div>
+        <label>Material:</label>
+        <InputText @bind-Value="product.Material" />
+        <ValidationMessage For="@(() => product.Material)" />
+    </div>
+
+    <div>
+        <label>Weight (kg):</label>
+        <InputNumber @bind-Value="product.Weight" />
+        <ValidationMessage For="@(() => product.Weight)" />
+    </div>
+
+    <button type="submit">Save Product</button>
+</EditForm>
+
+@if (products.Count > 0)
+{
+    <h4>Saved Products:</h4>
+    <ul>
+        @foreach (var p in products)
+        {
+            <li>@p.Name - @p.Price kr - @p.Material - @p.Weight kg</li>
+        }
+    </ul>
+}
+
+@code {
+    private Product product = new();
+    private List<Product> products = new();
+
+    private void SaveProduct()
+    {
+        products.Add(new Product
+        {
+            Name = product.Name,
+            Price = product.Price,
+            Material = product.Material,
+            Weight = product.Weight
+        });
+        product = new(); // reset form
+    }
+
+    public class Product
+    {
+        [Required(ErrorMessage = "Name is required")]
+        [MinLength(5, ErrorMessage = "Name must be at least 5 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Price is required")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be more than 0")]
+        public decimal Price { get; set; }
+
+        [Required(ErrorMessage = "Material is required")]
+        [NotPlastic]
+        public string Material { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Weight is required")]
+        [Range(0.01, 100, ErrorMessage = "Weight must be between 0.01 and 100 kg")]
+        public double Weight { get; set; }
+    }
+
+    public class NotPlasticAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            if (value?.ToString()?.ToLower() == "plastic")
+            {
+                return new ValidationResult("Material cannot be 'Plastic'.");
+            }
+            return ValidationResult.Success;
+        }
+    }
+}
