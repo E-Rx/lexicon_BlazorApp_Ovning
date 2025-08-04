@@ -1,0 +1,20 @@
+﻿@rendermode InteractiveWebAssembly
+
+<h4>Enter your name</h4>
+<input @bind="Name" placeholder="Type your name" />
+<button @onclick="SubmitName">Submit</button>
+
+@if (!string.IsNullOrEmpty(SubmittedName))
+{
+    <p>Hello, @SubmittedName!</p>
+}
+
+@code {
+    private string Name = "";
+    private string SubmittedName = "";
+
+    private void SubmitName()
+    {
+        SubmittedName = Name;
+    }
+}
